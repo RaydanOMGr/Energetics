@@ -3,3 +3,6 @@
 # Country: United States (United States)
 
 generator_block.placed: "Generator placed!"
+
+energy_remover.not_energy_block: "This block is not an energy block!"
+energy_remover.removed_energy: "Removed %energy% BE!"

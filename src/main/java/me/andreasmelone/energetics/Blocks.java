@@ -5,6 +5,7 @@ import com.burchard36.bukkit.energy.IEnergyStorage;
 import me.andreasmelone.amutillib.blocks.AMBlock;
 import me.andreasmelone.amutillib.blocks.BlockRegister;
 import me.andreasmelone.amutillib.registry.RegisteredObject;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.Optional;
 
@@ -14,7 +15,7 @@ public class Blocks {
     public static final RegisteredObject<AMBlock> GENERATOR_BLOCK = BlockRegister.getInstance().register(
             AMBlock.from(Items.GENERATOR_BLOCK.get())
     );
-    public static final int maxEnergyStored = 1000;
+    public static final int maxEnergyStored = 10000;
 
     public static void register() {
         // GENERATOR BLOCK START
@@ -25,6 +26,10 @@ public class Blocks {
 
         GENERATOR_BLOCK.get().onBlockBreak(event -> {
             plugin.getGeneratorListener().unregisterGenerator(event.getBlock().getLocation());
+            Optional<BukkitEnergy> energy = plugin.getEnergyFactory().getEnergyBlock(event.getBlock());
+            if(energy.isEmpty()) return;
+            IEnergyStorage bukkitEnergy = energy.get();
+            bukkitEnergy.burnEnergy(bukkitEnergy.getStoredEnergy());
         });
 
         // GENERATOR BLOCK END

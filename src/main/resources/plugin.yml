@@ -12,8 +12,16 @@ commands:
     usage: /giveitem <player> <item> <amount>
     permission: energetics.giveitem
     aliases: [giveitem, gi]
+  debugenergy:
+    description: Debug command, not for you
+    usage: /debugenergy <option>
+    permission: energetics.debugenergy
+    aliases: [debugenergy, de]
 
 permissions:
-    energetics.giveitem:
-        description: Allows the player to give items from this plugin
-        default: op
+  energetics.giveitem:
+    description: Allows the player to give items from this plugin
+    default: op
+  energetics.debugenergy:
+    description: Allows the player to debug energy
+    default: op

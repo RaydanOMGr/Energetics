@@ -3,8 +3,11 @@ package me.andreasmelone.energetics;
 import com.burchard36.bukkit.BukkitEnergyPlugin;
 import com.burchard36.bukkit.capability.EnergyFactory;
 import com.burchard36.bukkit.energy.BukkitEnergy;
+import com.jeff_media.customblockdata.CustomBlockData;
 import me.andreasmelone.amutillib.AMUtilLib;
 import me.andreasmelone.amutillib.i18n.I18n;
+import me.andreasmelone.amutillib.utils.CommandUtil;
+import me.andreasmelone.energetics.commands.DebugCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Energetics extends JavaPlugin {
@@ -25,6 +28,11 @@ public class Energetics extends JavaPlugin {
 
         AMUtilLib.getInstance().registerEvents(this);
         AMUtilLib.getInstance().registerCommands(this, "giveitem");
+
+        CommandUtil.registerTabExecutor(this, new DebugCommand(this), "debugenergy");
+
+        CustomBlockData.registerListener(this);
+        CustomBlockData.registerListener(BukkitEnergyPlugin.getInstance());
     }
 
     @Override
