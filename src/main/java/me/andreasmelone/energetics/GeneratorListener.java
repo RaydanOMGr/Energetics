@@ -75,7 +75,10 @@ public class GeneratorListener implements Listener {
         generators.add(location);
         Optional<BukkitEnergy> energy = plugin.getEnergyFactory().getEnergyBlock(location.getBlock());
         if(energy.isEmpty()) energy = plugin.getEnergyFactory().createEnergyBlock(location.getBlock());
-        if(energy.isEmpty()) unregisterGenerator(location);
+        if(energy.isEmpty()) {
+            unregisterGenerator(location);
+            return;
+        }
         IEnergyStorage bukkitEnergy = energy.get();
         bukkitEnergy.setMaxEnergyStored(Blocks.maxEnergyStored);
     }
