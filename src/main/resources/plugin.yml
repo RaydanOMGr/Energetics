@@ -1,0 +1,19 @@
+name: Energetics
+version: '${project.version}'
+main: me.andreasmelone.energetics.Energetics
+api-version: 1.19
+load: POSTWORLD
+depend:
+  - BukkitEnergy
+
+commands:
+  giveitem:
+    description: Gives the player an item
+    usage: /giveitem <player> <item> <amount>
+    permission: energetics.giveitem
+    aliases: [giveitem, gi]
+
+permissions:
+    energetics.giveitem:
+        description: Allows the player to give items from this plugin
+        default: op
