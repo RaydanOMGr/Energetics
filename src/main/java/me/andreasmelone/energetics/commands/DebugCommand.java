@@ -6,7 +6,6 @@ import com.jeff_media.customblockdata.CustomBlockData;
 import me.andreasmelone.energetics.Energetics;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -64,7 +63,7 @@ public class DebugCommand implements TabExecutor {
                     block.setType(Material.AIR);
                     data.clear();
                 });
-                plugin.getGeneratorListener().getGenerators().forEach(location -> {
+                plugin.getGeneratorListener().getGenerators().forEach((location, storage) -> {
                     plugin.getGeneratorListener().unregisterGenerator(location);
                 });
 

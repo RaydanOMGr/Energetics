@@ -7,6 +7,8 @@ import com.jeff_media.customblockdata.CustomBlockData;
 import me.andreasmelone.amutillib.AMUtilLib;
 import me.andreasmelone.amutillib.i18n.I18n;
 import me.andreasmelone.amutillib.utils.CommandUtil;
+import me.andreasmelone.energetics.blocks.Blocks;
+import me.andreasmelone.energetics.blocks.generator.GeneratorListener;
 import me.andreasmelone.energetics.commands.DebugCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 

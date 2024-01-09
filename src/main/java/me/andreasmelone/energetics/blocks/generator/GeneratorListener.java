@@ -1,31 +1,29 @@
-package me.andreasmelone.energetics;
+package me.andreasmelone.energetics.blocks.generator;
 
 import com.burchard36.bukkit.energy.BukkitEnergy;
 import com.burchard36.bukkit.energy.IEnergyStorage;
-import com.google.common.collect.ImmutableList;
+import com.burchard36.bukkit.enums.IOType;
 import me.andreasmelone.amutillib.blocks.AMBlock;
 import me.andreasmelone.amutillib.events.ServerTickEvent;
 import me.andreasmelone.amutillib.utils.Util;
-import org.bukkit.Bukkit;
+import me.andreasmelone.energetics.blocks.Blocks;
+import me.andreasmelone.energetics.Energetics;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Furnace;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryInteractEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
+import org.bukkit.event.world.WorldSaveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Optional;
 
 public class GeneratorListener implements Listener {
@@ -34,7 +32,7 @@ public class GeneratorListener implements Listener {
         this.plugin = plugin;
     }
 
-    List<Location> generators = new ArrayList<>();
+    HashMap<Location, GeneratorStorage> generators = new HashMap();
 
     @EventHandler
     public void onChunkLoad(ChunkLoadEvent event) {
@@ -56,7 +54,7 @@ public class GeneratorListener implements Listener {
 
     @EventHandler
     public void onServerTick(ServerTickEvent event) {
-        generators.forEach(location -> {
+        generators.forEach((location, storage) -> {
             Block block = location.getBlock();
             if(!Blocks.GENERATOR_BLOCK.get().compareTo(block)) return;
 
@@ -71,28 +69,19 @@ public class GeneratorListener implements Listener {
 
             furnace.setCookTimeTotal(bukkitEnergy.getMaxEnergyStorage());
             furnace.setCookTime((short) bukkitEnergy.getStoredEnergy());
-            furnace.update(true, false);
 
-            PersistentDataContainer pdc = furnace.getPersistentDataContainer();
-            int fuelTicks = pdc.getOrDefault(
-                    Keys.FUEL_TICKS,
-                    PersistentDataType.INTEGER,
-                    0
-            );
+            int fuelTicks = storage.getFuelTicks();
 
             if(fuelTicks > 0) {
-                fuelTicks--;
-                pdc.set(Keys.FUEL_TICKS, PersistentDataType.INTEGER, fuelTicks);
+                storage.decrementFuelTicks();
                 bukkitEnergy.generateEnergy(20);
             } else {
                 ItemStack fuel = furnace.getInventory().getFuel();
                 if(fuel != null && fuel.getType() == Material.COAL) {
-                    fuelTicks = 200;
-                    pdc.set(Keys.FUEL_TICKS, PersistentDataType.INTEGER, fuelTicks);
+                    storage.setFuelTicks(200);
 
                     furnace.getInventory().setFuel(fuel);
-                    furnace.setBurnTime((short)((short) 1600 * (double) fuelTicks / 200));
-                    furnace.update(true, false);
+                    furnace.setBurnTime((short) storage.getFuelTicks());
 
                     if(fuel.getAmount() > 1) fuel.setAmount(fuel.getAmount() - 1);
                     else furnace.getInventory().setFuel(null);
@@ -100,6 +89,8 @@ public class GeneratorListener implements Listener {
                     bukkitEnergy.generateEnergy(20);
                 }
             }
+
+            furnace.update(true, false);
 
             Material itemMaterial = Material.RED_STAINED_GLASS_PANE;
             if((double) bukkitEnergy.getStoredEnergy() / bukkitEnergy.getMaxEnergyStorage() > 0.5)
@@ -124,8 +115,19 @@ public class GeneratorListener implements Listener {
         if(event.getSlotType() == InventoryType.SlotType.RESULT) event.setCancelled(true);
     }
 
+    @EventHandler
+    public void onWorldSave(WorldSaveEvent event) {
+        generators.forEach((location, storage) -> {
+            if(!(location.getBlock().getState() instanceof Furnace furnace)) return;
+            storage.save(furnace);
+        });
+    }
+
     public void registerGenerator(Location location) {
-        generators.add(location);
+        if(!(location.getBlock().getState() instanceof Furnace furnace)) return;
+
+        generators.put(location, GeneratorStorage.load(furnace.getPersistentDataContainer()));
+
         Optional<BukkitEnergy> energy = plugin.getEnergyFactory().getEnergyBlock(location.getBlock());
         if(energy.isEmpty()) energy = plugin.getEnergyFactory().createEnergyBlock(location.getBlock());
         if(energy.isEmpty()) {
@@ -135,14 +137,11 @@ public class GeneratorListener implements Listener {
         }
         IEnergyStorage bukkitEnergy = energy.get();
         bukkitEnergy.setMaxEnergyStored(Blocks.maxEnergyStored);
+        for (BlockFace face : BlockFace.values()) {
+            bukkitEnergy.toggleFaceIOType(face, IOType.OUTPUT);
+        }
 
-        if(!(location.getBlock().getState() instanceof Furnace furnace)) return;
-        PersistentDataContainer pdc = furnace.getPersistentDataContainer();
-        int fuelTicks = pdc.getOrDefault(
-                Keys.FUEL_TICKS,
-                PersistentDataType.INTEGER,
-                0
-        );
+        int fuelTicks = generators.get(location).getFuelTicks();
 
         furnace.setBurnTime((short) fuelTicks);
         furnace.update(true, false);
@@ -152,7 +151,7 @@ public class GeneratorListener implements Listener {
         generators.remove(location);
     }
 
-    public List<Location> getGenerators() {
-        return ImmutableList.copyOf(generators);
+    public HashMap<Location, GeneratorStorage> getGenerators() {
+        return new HashMap<>(generators);
     }
 }

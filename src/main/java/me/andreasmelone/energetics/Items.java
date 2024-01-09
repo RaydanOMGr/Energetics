@@ -20,7 +20,7 @@ public class Items {
     public static final RegisteredObject<AMItem> GENERATOR_BLOCK = ItemRegister.getInstance().register(
             ItemBuilder.createBuilder(plugin, "generator_block")
                     .setName("&rGenerator Block")
-                    .setLore("&r&fGenerates &220 &eBE&f/&4T")
+                    .setLore("&r&fGenerates &e20 BE/t")
                     .setMaterial(Material.FURNACE)
                     .build()
     );

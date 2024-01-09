@@ -1,11 +1,12 @@
-package me.andreasmelone.energetics;
+package me.andreasmelone.energetics.blocks;
 
 import com.burchard36.bukkit.energy.BukkitEnergy;
 import com.burchard36.bukkit.energy.IEnergyStorage;
 import me.andreasmelone.amutillib.blocks.AMBlock;
 import me.andreasmelone.amutillib.blocks.BlockRegister;
 import me.andreasmelone.amutillib.registry.RegisteredObject;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import me.andreasmelone.energetics.Energetics;
+import me.andreasmelone.energetics.Items;
 
 import java.util.Optional;
 
